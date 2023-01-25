@@ -2,13 +2,14 @@ import axios from "axios";
 import { useEffect } from "react";
 import { useState } from "react";
 import { IoSearchOutline } from "react-icons/io5";
+import { Link } from "react-router-dom";
 
 export default function Header() {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    axios.get("https://demo-api-one.vercel.app/api/categories").then((res) => {
-      setCategories(res.data.body);
+    axios.get("http://localhost:8000/categories").then((res) => {
+      setCategories(res.data);
     });
   }, []);
 
@@ -39,7 +40,7 @@ export default function Header() {
               </li>
               {categories.map((item) => (
                 <li key={item.id}>
-                  <a href="/">{item.name}</a>
+                  <Link to={`/categories/${item.id}`}>{item.name}</Link>
                 </li>
               ))}
             </ul>

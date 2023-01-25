@@ -1,19 +1,23 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
 
 export default function Article() {
   const { id } = useParams();
 
   const [article, setArticle] = useState({});
   useEffect(() => {
-    fetch(`https://demo-api-one.vercel.app/api/articles/${id}`)
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        setArticle(data.body);
-      });
+    axios(`http://localhost:8000/articles/${id}`).then((res) => {
+      setArticle(res.data);
+    });
+    // fetch(`https://localhost:8000/articles/${id}`)
+    //   .then((res) => {
+    //     return res.json();
+    //   })
+    //   .then((data) => {
+    //     setArticle(data);
+    //   });
   }, []);
 
   return (

@@ -12,6 +12,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/article/:id" element={<Article />} />
+        <Route path="/categories/:categoryId" element={<Home />} />
         <Route path="/chat" element={<ChatScreen />} />
       </Routes>
 
