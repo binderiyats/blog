@@ -4,24 +4,41 @@ import { useEffect, useState } from "react";
 import currencyFormatter from "../components/utils/currencyFormatter";
 
 import relateTime from "dayjs/plugin/relativeTime";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 dayjs.extend(relateTime);
 
 export default function Products() {
+  const [isReady, setIsReady] = useState(false);
+
   const [page, setPage] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [locationQuery, setLocationQuery] = useState("");
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get(
-        `http://localhost:8000/products?pageSize=${pageSize}&page=${currentPage}`
-      )
-      .then((res) => {
-        setPage(res.data);
-      });
-  }, [currentPage, pageSize]);
+    const newQuery = new URLSearchParams();
+    newQuery.set("pageSize", pageSize);
+    newQuery.set("page", currentPage);
+    if (searchQuery !== "") {
+      newQuery.set("q", searchQuery);
+    }
+    setLocationQuery(newQuery.toString());
+  }, [currentPage, pageSize, searchQuery]);
+
+  useEffect(() => {
+    navigate(`/products?${locationQuery}`);
+  }, [locationQuery]);
+
+  useEffect(() => {
+    if (isReady) {
+      getResults();
+    }
+  }, [isReady]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -31,7 +48,29 @@ export default function Products() {
     if (searchParams.has("pageSize")) {
       setPageSize(Number(searchParams.get(`pageSize`)));
     }
+    if (searchParams.has("q")) {
+      setSearchQuery(searchParams.get("pageSize"));
+    }
+    if (isReady) {
+      getResults();
+    } else {
+      setIsReady(true);
+    }
   }, [location]);
+
+  const getResults = () => {
+    const urlParams = new URLSearchParams();
+    urlParams.set("pageSize", pageSize);
+    urlParams.set("page", currentPage);
+    if (searchQuery !== "") {
+      urlParams.set("q", searchQuery);
+    }
+    axios
+      .get(`http://localhost:8000/products?${urlParams.toString()}`)
+      .then((res) => {
+        setPage(res.data);
+      });
+  };
 
   if (!page) {
     return (
@@ -58,20 +97,13 @@ export default function Products() {
         </li>
       );
     }
+
+    //adding current
     if (page.page !== 1 && page.page !== page.totalPages) {
       result.push(
         <li className={`page-item active`}>
           <a href="#" className="page-link">
             {page.page}
-          </a>
-        </li>
-      );
-    }
-    if (page.page === 1 && page.page === 2) {
-      result.push(
-        <li className={`page-item active`}>
-          <a href="#" className="page-link">
-            2
           </a>
         </li>
       );
